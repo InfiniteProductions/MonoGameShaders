@@ -40,9 +40,11 @@
   <ItemGroup>
     <Compile Include="Ambient.cs" />
     <Compile Include="Diffuse.cs" />
+    <Compile Include="NormalMap.cs" />
     <Compile Include="Specular.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Textured.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
