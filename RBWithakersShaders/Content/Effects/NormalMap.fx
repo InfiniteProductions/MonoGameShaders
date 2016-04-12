@@ -45,7 +45,7 @@ sampler2D bumpSampler = sampler_state {
 
 struct VertexShaderInput
 {
-    float4 Position : SV_POSITION;
+    float4 Position : POSITION0;
     float3 Normal : NORMAL0;
     float3 Tangent : TANGENT0;
     float3 Binormal : BINORMAL0;
@@ -54,7 +54,7 @@ struct VertexShaderInput
  
 struct VertexShaderOutput
 {
-    float4 Position : SV_POSITION;
+    float4 Position : POSITION0;
     float2 TextureCoordinate : TEXCOORD0;
     float3 Normal : TEXCOORD1;
     float3 Tangent : TEXCOORD2;
