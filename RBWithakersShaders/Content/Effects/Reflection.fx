@@ -34,7 +34,7 @@ struct VertexShaderInput
  
 struct VertexShaderOutput
 {
-    float4 Position : POSITION0;
+    float4 Position : SV_POSITION;  // POSITION0 or this: no change
     float3 Reflection : TEXCOORD0;
 };
  

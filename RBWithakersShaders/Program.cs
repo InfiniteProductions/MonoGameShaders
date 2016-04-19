@@ -8,7 +8,7 @@ namespace RBWithakersShaders
         [STAThread]
         static void Main()
         {
-            using (var game = new Reflection())
+            using (var game = new Transparency())
                 game.Run();
         }
     }

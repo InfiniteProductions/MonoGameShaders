@@ -4,29 +4,34 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+
 namespace RBWithakersShaders
 {
-    class SkyboxShader : Microsoft.Xna.Framework.Game
+    public class Transparency : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Effect effect;
 
-        Skybox skybox;
         Matrix world = Matrix.Identity;
         Matrix view = Matrix.CreateLookAt(new Vector3(20, 0, 0), new Vector3(0, 0, 0), Vector3.UnitY);
         Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 800f / 600f, 0.1f, 100f);
-        Vector3 cameraPosition;
         float angle = 0;
-        float distance = 20;
+        float distance = 10;
+
+        Model model; //, modelB;
+        Texture2D texture;
+
+        Vector3 cameraPosition;
+        Skybox skybox;
+
+        //Matrix[] choppersPos;
 
         Vector3 viewVector;
 
-        Model model;
-        Texture2D texture;
-        private Texture2D normalMap;
+        float transparency;
 
-        public SkyboxShader()
+        public Transparency()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -34,6 +39,15 @@ namespace RBWithakersShaders
 
         protected override void Initialize()
         {
+            transparency = 0.2f;
+
+            //choppersPos = new Matrix[10];
+
+            //for (Byte i = 0; i < 10; i++)
+            //{
+            //    choppersPos[i] = Matrix.CreateTranslation(10, 1 + 3 * i, -30);
+            //}
+
             base.Initialize();
         }
 
@@ -42,35 +56,48 @@ namespace RBWithakersShaders
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             model = Content.Load<Model>("Models/Helicopter");
-            effect = Content.Load<Effect>("Effects/NormalMap");
+            //modelB = Content.Load<Model>("Models/UntexturedSphere");
+            effect = Content.Load<Effect>("Effects/Transparency");
             texture = Content.Load<Texture2D>("Textures/HelicopterTexture");
-            normalMap = Content.Load<Texture2D>("Textures/HelicopterNormalMap");
 
             skybox = new Skybox("Skyboxes/Sunset", Content);
         }
 
+
         protected override void UnloadContent()
         {
+            Content.Unload();
         }
+
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+
             cameraPosition = distance * new Vector3((float)Math.Sin(angle), 0, (float)Math.Cos(angle));
             Vector3 cameraTarget = new Vector3(0, 0, 0);
             viewVector = Vector3.Transform(cameraTarget - cameraPosition, Matrix.CreateRotationY(0));
             viewVector.Normalize();
 
-            angle += 0.002f;
+            angle += 0.006f;
             view = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 0, 0), Vector3.UnitY);
 
             base.Update(gameTime);
         }
+
+
         protected override void Draw(GameTime gameTime)
         {
+            //GraphicsDevice.Clear(Color.LightSeaGreen);
             GraphicsDevice.Clear(Color.Black);
+
+            //for (Byte i = 0; i < 10; i++)
+            //{
+            //    // drawing cannot be mixed ??? DrawModel => exception
+            //    DrawModel(modelB, choppersPos[i], view, projection);
+            //}
 
             RasterizerState originalRasterizerState = graphics.GraphicsDevice.RasterizerState;
             RasterizerState rasterizerState = new RasterizerState();
@@ -81,10 +108,13 @@ namespace RBWithakersShaders
 
             graphics.GraphicsDevice.RasterizerState = originalRasterizerState;
 
+            // warning: if the same model is used, even with too separated content.load calls,
+            // the use of DrawModel don't work cause effect cannot be cast into BasicEffect type (is here any static somewhere ?)
             DrawModelWithEffect(model, world, view, projection);
 
             base.Draw(gameTime);
         }
+
 
         private void DrawModel(Model model, Matrix world, Matrix view, Matrix projection)
         {
@@ -102,6 +132,7 @@ namespace RBWithakersShaders
             }
         }
 
+
         private void DrawModelWithEffect(Model model, Matrix world, Matrix view, Matrix projection)
         {
             foreach (ModelMesh mesh in model.Meshes)
@@ -114,7 +145,10 @@ namespace RBWithakersShaders
                     effect.Parameters["Projection"].SetValue(projection);
                     effect.Parameters["ViewVector"].SetValue(viewVector);
                     effect.Parameters["ModelTexture"].SetValue(texture);
-                    effect.Parameters["NormalMap"].SetValue(normalMap);
+                    effect.Parameters["Transparency"].SetValue(transparency);
+
+                    //effect.Parameters["AmbientColor"].SetValue(Color.Green.ToVector4());
+                    //effect.Parameters["AmbientIntensity"].SetValue(0.5f);
 
                     Matrix worldInverseTransposeMatrix = Matrix.Transpose(Matrix.Invert(mesh.ParentBone.Transform * world));
                     effect.Parameters["WorldInverseTranspose"].SetValue(worldInverseTransposeMatrix);
